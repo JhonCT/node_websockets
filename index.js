@@ -1,11 +1,11 @@
-const path = require('path');
 const express = require('express');
 const MongoClient = require('mongodb').MongoClient;
 const app = express();
+const expressWs = require('express-ws')(app);
 
 app.set('port', process.env.PORT || 3000);
 
-app.use(express.static(path.join(__dirname, 'public')));
+//app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
@@ -46,12 +46,9 @@ const server = app.listen(app.get('port'), () => {
     console.log('server on port', app.get('port'));
 });
 
-const SocketIO = require('socket.io');
-const io = SocketIO(server);
-
-io.on('connection', (socket) => {
+app.ws.on('connection', (socket) => {
     socket.on('chat:message', (data) => {
-        io.sockets.emit('chat:message', data);
+        app.ws.sockets.emit('chat:message', data);
         messages.insertOne(data);
     });
 
